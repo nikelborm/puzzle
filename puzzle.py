@@ -9,7 +9,7 @@ try:
 except :
     print('Библиотека win32api не найдена. Вы можете её установить следующей коммандой в консоли с правами администратора: ')
     print('pip install pywin32')
-    input('Нажмите Enter для завершения')
+    input('Нажмите Enter для завершения\n')
     exit()
 HICON = c_int
 LPTSTR = LPWSTR
@@ -143,9 +143,9 @@ def mkdir(path, alert=True):
         os.makedirs(path)
     except OSError:
         print('Создать директорию %s не удалось' % path)
-        input('Завершите программу, иначе дальнейшая корректная работа не будет гарантирована')
+        input('Завершите программу, иначе дальнейшая корректная работа не будет гарантирована\n')
     else:
-        alert and print('Успешно создана директория %s ' % path)
+        alert and print('Успешно создана директория %s \n' % path)
 
 #######################################################################
 
@@ -155,14 +155,14 @@ try:
 except :
     print('Библиотека PIL не найдена. Вы можете её установить следующей коммандой в консоли с правами администратора: ')
     print('pip install pillow')
-    input('Нажмите Enter для завершения')
+    input('Нажмите Enter для завершения\n')
     exit()
 
 dir_for_icons = 'C:\\PleaseDontDeleteMe\\'
 
 # Чистка предыдущих временных файлов
 if os.path.isdir(dir_for_icons):
-    print('Обнаружены временные файлы с предыдущих запусков. Очистка...')
+    print('Обнаружены временные файлы с предыдущих запусков. Очистка...\n')
     from shutil import rmtree
     rmtree(dir_for_icons, ignore_errors = True)
 
@@ -174,33 +174,35 @@ mkdir(dir_for_icons)
 # Ввод, проверка имени, открытие исходной картинки
 isExists = False
 while not isExists:
-    imgName = input('Введите имя файла картинки, которая лежит в одной папке с программой: ')
+    print('Введите имя файла картинки, которая лежит в одной папке с программой:')
+    imgName = input('>>> ')
     if imgName and os.path.isfile(imgName):
         isExists = True
     elif os.path.isfile('input.jpg'):
-        print('По заданному пути файл не найден, кроме заданного по умолчанию: input.jpg')
+        print('По заданному пути файл не найден, кроме заданного по умолчанию: input.jpg\n')
         isExists = True
         imgName = 'input.jpg'
     else:
-        print('Файл с картинкой по указанному пути не найден! Попробуйте снова...')
+        print('Файл с картинкой по указанному пути не найден! Попробуйте снова...\n')
     
     if isExists:
         try:
             img = Image.open(imgName).convert('RGBA')
         except:
-            print(f'Файл {imgName} скорее всего не является картинкой. Попробуйте другую картинку.')
+            print(f'Файл {imgName} скорее всего не является картинкой. Попробуйте другую картинку.\n')
             isExists = False
         else:
             imgWidth = img.size[0]
             imgHeight = img.size[1]
-            print(f'Картинка с разрешением {imgWidth} * {imgHeight} успешно открыта.')
+            print(f'Картинка с разрешением {imgWidth} * {imgHeight} успешно открыта.\n')
 
 # Обнаружение рабочего стола пользователя
 try:
     env = dict(os.environ)
     deskPath = f"{env['HOMEDRIVE'] + env['HOMEPATH']}\\Desktop\\"
 except:
-    user = input('Введите имя вашего пользователя: ')
+    print('Введите имя вашего пользователя: ')
+    user = input('>>> ')
     deskPath = f'C:\\Users\\{user}\\Desktop\\'
     if not user and os.path.isdir(deskPath):
         deskPath = 'C:\\Users\\User\\Desktop\\'
@@ -211,26 +213,57 @@ listOfAllMultipliers.sort()
 stringForChoose = ', '.join(map(str,listOfAllMultipliers))
 
 # Выбор размера мозайки
+print('''Выберете режим ввода:
+Вы задаёте разрешение иконки в пикселях[1](по умолчанию)
+Вы задаёте разрешение мозаики в ячейках[2]''')
+
+mode = input('>>> ')
+if not mode in ['1','2']:
+    print('Вы ввели недопустимое значение! Будет установлен режим по умолчанию: 1')
+    mode = '1'
+
+if mode == '1':
+    print('\n', stringForChoose, '\n')
+    maxStep = min(imgWidth, imgHeight)
+
+oldImgWidth = imgWidth
+oldImgHeight = imgHeight
+
 changeChoice = True
 while changeChoice:
-    print('\n', stringForChoose, '\n')
     try:
-        step = int(input('Введите размер иконки из предложенного выше списка: '))
-        if step < 1:
-            raise
+        if mode == '1':
+            print('Введите размер иконки из предложенного выше списка:')
+            step = int(input('>>> '))
+            if step < 1 or step > maxStep:
+                raise
+            cellX = imgWidth // step
+            cellY = imgHeight // step
+            question = 'Выберите новый размер иконки'
+        else:
+            print('Введите ширину в ячейках: ')
+            cellX = int(input('>>> '))
+            print('Введите высоту в ячейках: ')
+            cellY = int(input('>>> '))
+            if cellX < 1 or cellX > imgWidth or cellY < 1 or cellY > imgHeight:
+                raise
+            step = min(imgWidth // cellX, imgHeight // cellY)
     except:
-        print('Вы ввели недопустимое значение!')
+        print('Вы ввели недопустимые значения!')
         continue
-    cellX = imgWidth // step
-    cellY = imgHeight // step
-    allCells = cellY * cellX
-    print(f'У вас получится мозайка состоящая из {allCells} ячеек: {cellX} в ширину и {cellY} в высоту')
-    step in listOfAllMultipliers or print(f'Вы выбрали значение не из списка. В этом случае картинка обрежется до: {cellX * step} в ширину и {cellY * step} в высоту')
-    changeChoice = input('Изменить выбор? [д\Н]') in ['да','ДА','Да','Д','д','Yes','yes','YES','Y','y']
+    allCells = cellX * cellY
+    print(f'У вас получится мозайка состоящая из {allCells} ячеек: {cellX} в ширину и {cellY} в высоту, при размере иконки {step}')
+    imgWidth = cellX * step
+    imgHeight = cellY * step
+    (imgWidth, imgHeight) != (oldImgWidth, oldImgHeight) and print(f'Картинка обрежется до: {imgWidth} в ширину и {imgHeight} в высоту')
+    print('Изменить выбор? [д\Н] ')
+    if input('>>> ') in ['да','ДА','Да','Д','д','Yes','yes','YES','Y','y','l','L']:
+        imgWidth = oldImgWidth
+        imgHeight = oldImgHeight
+        changeChoice = True
 print()
 
 # Генерация папок, нарезка иконок, привязка иконок к папкам
-
 imgWidth -= step - 1
 imgHeight -= step - 1
 numNow = 0
