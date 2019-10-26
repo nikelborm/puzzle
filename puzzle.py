@@ -1,4 +1,11 @@
 #######################################################################
+# Декорирование функции input
+oldinput = input
+def input(prompt):
+    print(prompt)
+    return oldinput('>>> ')
+
+#######################################################################
 
 import os
 import ctypes
@@ -81,6 +88,7 @@ def seticon(folderpath, iconpath, iconindex):
     index = shell32.Shell_GetCachedImageIndexW(sfi.szDisplayName, sfi.iIcon, 0)
 
     shell32.SHUpdateImageW(sfi.szDisplayName, sfi.iIcon, 0, index)
+
 #######################################################################
 
 def NOD(A,B):
@@ -143,7 +151,7 @@ def mkdir(path, alert=True):
         os.makedirs(path)
     except OSError:
         print('Создать директорию %s не удалось' % path)
-        input('Завершите программу, иначе дальнейшая корректная работа не будет гарантирована\n')
+        oldinput('Завершите программу, иначе дальнейшая корректная работа не будет гарантирована\n')
     else:
         alert and print('Успешно создана директория %s \n' % path)
 
@@ -174,8 +182,7 @@ mkdir(dir_for_icons)
 # Ввод, проверка имени, открытие исходной картинки
 isExists = False
 while not isExists:
-    print('Введите имя файла картинки, которая лежит в одной папке с программой:')
-    imgName = input('>>> ')
+    imgName = input('Введите имя файла картинки, которая лежит в одной папке с программой:')
     if imgName and os.path.isfile(imgName):
         isExists = True
     elif os.path.isfile('input.jpg'):
@@ -201,8 +208,7 @@ try:
     env = dict(os.environ)
     deskPath = f"{env['HOMEDRIVE'] + env['HOMEPATH']}\\Desktop\\"
 except:
-    print('Введите имя вашего пользователя: ')
-    user = input('>>> ')
+    user = input('Введите имя вашего пользователя: ')
     deskPath = f'C:\\Users\\{user}\\Desktop\\'
     if not user and os.path.isdir(deskPath):
         deskPath = 'C:\\Users\\User\\Desktop\\'
@@ -213,11 +219,10 @@ listOfAllMultipliers.sort()
 stringForChoose = ', '.join(map(str,listOfAllMultipliers))
 
 # Выбор размера мозайки
-print('''Выберете режим ввода:
+mode = input('''Выберете режим ввода:
 Вы задаёте разрешение иконки в пикселях[1](по умолчанию)
 Вы задаёте разрешение мозаики в ячейках[2]''')
 
-mode = input('>>> ')
 if not mode in ['1','2']:
     print('Вы ввели недопустимое значение! Будет установлен режим по умолчанию: 1')
     mode = '1'
@@ -233,18 +238,14 @@ changeChoice = True
 while changeChoice:
     try:
         if mode == '1':
-            print('Введите размер иконки из предложенного выше списка:')
-            step = int(input('>>> '))
+            step = int(input('Введите размер иконки из предложенного выше списка:'))
             if step < 1 or step > maxStep:
                 raise
             cellX = imgWidth // step
             cellY = imgHeight // step
-            question = 'Выберите новый размер иконки'
         else:
-            print('Введите ширину в ячейках: ')
-            cellX = int(input('>>> '))
-            print('Введите высоту в ячейках: ')
-            cellY = int(input('>>> '))
+            cellX = int(input('Введите ширину в ячейках:'))
+            cellY = int(input('Введите высоту в ячейках:'))
             if cellX < 1 or cellX > imgWidth or cellY < 1 or cellY > imgHeight:
                 raise
             step = min(imgWidth // cellX, imgHeight // cellY)
@@ -256,8 +257,8 @@ while changeChoice:
     imgWidth = cellX * step
     imgHeight = cellY * step
     (imgWidth, imgHeight) != (oldImgWidth, oldImgHeight) and print(f'Картинка обрежется до: {imgWidth} в ширину и {imgHeight} в высоту')
-    print('Изменить выбор? [д\Н] ')
-    if input('>>> ') in ['да','ДА','Да','Д','д','Yes','yes','YES','Y','y','l','L']:
+    
+    if input('Изменить выбор? [д\Н]') in ['да','ДА','Да','Д','д','Yes','yes','YES','Y','y','l','L']:
         imgWidth = oldImgWidth
         imgHeight = oldImgHeight
         changeChoice = True
