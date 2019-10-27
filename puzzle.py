@@ -262,6 +262,8 @@ while changeChoice:
         imgWidth = oldImgWidth
         imgHeight = oldImgHeight
         changeChoice = True
+    else:
+        changeChoice = False
 print()
 
 # Генерация папок, нарезка иконок, привязка иконок к папкам
