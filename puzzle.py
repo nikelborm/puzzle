@@ -275,12 +275,12 @@ for numx, x in enumerate(range(0, imgWidth, step)):
     for numy, y in enumerate(range(0, imgHeight, step)):
         numNow += 1
         canvasDir = deskPath + ' ' * numNow + '\\'
-##        if os.path.isdir(canvasDir):
-##            print('Обнаружена ячейка с прошлой игры. Замена...')
-##            rmtree(canvasDir, ignore_errors = False)
-        mkdir(canvasDir, False)
+        if os.path.isdir(canvasDir):
+            print('Обнаружена ячейка с прошлой игры. Замена...')
+        else:
+            mkdir(canvasDir, False)
         
-        print(f'Создаётся иконка {numNow} из {allCells}.')
+        print(f'Создаётся ячейка {numNow} из {allCells}.')
         
         newImg = img.crop( (x, y, x + step, y + step) )
         iconDir = f'{dir_for_icons}x{numx + 1}_y{numy + 1}.ico'
