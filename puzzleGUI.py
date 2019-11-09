@@ -3,7 +3,8 @@
 import os
 import ctypes
 from ctypes import POINTER, Structure, c_wchar, c_int, sizeof, byref
-if os.name == 'not':
+isWindows = os.name == 'nt'
+if isWindows:
     from ctypes.wintypes import BYTE, WORD, DWORD, LPWSTR, LPSTR
     try:
         import win32api
@@ -304,7 +305,6 @@ class ExampleApp(QtWidgets.QMainWindow, Ui_MainWindow):
         # Подключение обработчиков кликов на кнопки
         s.clearParams_button.clicked.connect(s.clearAllFields)
         s.calculate_button.clicked.connect(s.calculate)
-        s.createPuzzle_button.clicked.connect(s.createPuzzle)
         s.selectImgPath_button.clicked.connect(s.browseImgPath)
 ##        s.delPrevPuzzle_button.clicked.connect(s.delPreviousPuzzle)
         
@@ -335,14 +335,10 @@ class ExampleApp(QtWidgets.QMainWindow, Ui_MainWindow):
         s.changeStateOf2ndStep(False)
         # Первоначальная блокировка 3-го этапа (само создание мозаики)
         s.changeStateOf3rdStep()
-        if os.name != 'nt':
-            s.desktopPath_field.setEnabled(False)
-            s.selectDesktopPath_button.setEnabled(False)
-            s.aboutDesktopPath_label.setStyleSheet("color: #900;")
-            s.aboutDesktopPath_label.setText("К сожалению, ОС, отличные от Windows, не поддерживаются.")
-        else:
+        if isWindows:
             s.desktopPath_field.textChanged.connect(s.onChangeDesktopPath)
             s.selectDesktopPath_button.clicked.connect(s.browseDesktopPath)
+            s.createPuzzle_button.clicked.connect(s.createPuzzle)
             # Чистка предыдущих временных файлов
             dir_for_icons = 'C:/PleaseDontDeleteMe'
             if os.path.isdir(dir_for_icons):
@@ -354,6 +350,12 @@ class ExampleApp(QtWidgets.QMainWindow, Ui_MainWindow):
             dir_for_icons += f'/dir_for_icons{random()}'
             mkdir(dir_for_icons)
             s.dir_for_icons = dir_for_icons
+        else:
+            s.desktopPath_field.setEnabled(False)
+            s.selectDesktopPath_button.setEnabled(False)
+            s.aboutDesktopPath_label.setStyleSheet('color: #900;')
+            s.aboutDesktopPath_label.setText('К сожалению, ОС, отличные от Windows, не поддерживаются.')
+            s.createPuzzle_button.setToolTip('ОС, отличные от Windows, не поддерживаются')
     
     def onChangeImgPath(s):
         # Обработчик изменениия пути к картинке
@@ -566,7 +568,7 @@ window = QtWidgets.QApplication([])
 window.setStyle('Fusion')
 app = ExampleApp()
 app.show()
-if os.name == 'nt':
+if isWindows:
     # Попытка установки папки рабочего стола по умолчанию
     try:
         env = dict(os.environ)
