@@ -478,8 +478,10 @@ class ExampleApp(QtWidgets.QMainWindow, Ui_MainWindow):
             Он будет изменён с {oldIconSize} на {iconSize}, для наименьшей обрезки картинки.
             Размер мозаики при этом останется неизменным. '''
         allCells = str(cellX * cellY)
-        ending = 'ки' if allCells[-1] == '1' and (allCells == '1' or allCells[-2] != '1') else 'ок'
-        message += f'У вас получится мозайка, состоящая из {allCells} ({cellX}*{cellY}) пап{ending}, при размере иконки {iconSize}*{iconSize}. '
+        ending1 = f' ({cellX}*{cellY})' if allCells != '1' else ''
+        ending2 = 'ки' if allCells[-1] == '1' and (allCells == '1' or allCells[-2] != '1') else 'ок'
+        
+        message += f'У вас получится мозайка, состоящая из {allCells + ending1} пап{ending2}, при размере иконки {iconSize}*{iconSize}. '
         if (imgWidth, imgHeight) != (s.imgWidth, s.imgHeight):
             percentX = f'{(1 - imgWidth / s.imgWidth) * 100:.1f}'
             percentY = f'{(1 - imgHeight/s.imgHeight) * 100:.1f}'
