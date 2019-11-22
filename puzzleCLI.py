@@ -10,20 +10,13 @@ import os
 import ctypes
 from ctypes import POINTER, Structure, c_wchar, c_int, sizeof, byref
 from ctypes.wintypes import BYTE, WORD, DWORD, LPWSTR, LPSTR
-try:
-    import win32api
-except :
-    print('Библиотека win32api не найдена. Вы можете её установить следующей коммандой в консоли с правами администратора: ')
-    print('pip install pywin32')
-    input('Нажмите Enter для завершения\n')
-    exit()
 HICON = c_int
 LPTSTR = LPWSTR
 TCHAR = c_wchar
 MAX_PATH = 260
 FCSM_ICONFILE = 0x00000010
 FCS_FORCEWRITE = 0x00000002
-SHGFI_ICONLOCATION = 0x000001000    
+SHGFI_ICONLOCATION = 0x000001000
 
 class GUID(Structure):
     _fields_ = [
@@ -56,7 +49,7 @@ class SHFILEINFO(Structure):
         ('iIcon', c_int),
         ('dwAttributes', DWORD),
         ('szDisplayName', TCHAR * MAX_PATH),
-        ('szTypeName', TCHAR * 80)]    
+        ('szTypeName', TCHAR * 80)]
 
 def seticon(folderpath, iconpath, iconindex):
     """Set folder icon.
@@ -76,10 +69,9 @@ def seticon(folderpath, iconpath, iconindex):
     fcs.cchIconFile = 0
     fcs.iIconIndex = iconindex
 
-    hr = shell32.SHGetSetFolderCustomSettings(byref(fcs), folderpath,
-                                              FCS_FORCEWRITE)
+    hr = shell32.SHGetSetFolderCustomSettings(byref(fcs), folderpath, FCS_FORCEWRITE)
     if hr:
-        raise WindowsError(win32api.FormatMessage(hr))
+        raise WindowsError('Ахуеть!')
 
     sfi = SHFILEINFO()
     hr = shell32.SHGetFileInfoW(folderpath, 0, byref(sfi), sizeof(sfi), SHGFI_ICONLOCATION)
@@ -198,7 +190,7 @@ while not isExists:
         imgName = 'input.jpg'
     else:
         print('Файл с картинкой по указанному пути не найден! Попробуйте снова...\n')
-    
+
     if isExists:
         try:
             img = Image.open(imgName).convert('RGBA')
@@ -243,29 +235,27 @@ oldImgHeight = imgHeight
 
 changeChoice = True
 while changeChoice:
-    try:
-        if mode == '1':
-            step = int(input('Введите размер иконки из предложенного выше списка:'))
-            if step < 1 or step > maxStep:
-                raise
-            cellX = imgWidth // step
-            cellY = imgHeight // step
-        else:
-            cellX = int(input('Введите ширину в ячейках:'))
-            cellY = int(input('Введите высоту в ячейках:'))
-            if cellX < 1 or cellX > imgWidth or cellY < 1 or cellY > imgHeight:
-                raise
-            step = min(imgWidth // cellX, imgHeight // cellY)
-    except:
-        print('Вы ввели недопустимые значения!')
-        continue
+    if mode == '1':
+        step = int(input('Введите размер иконки из предложенного выше списка:'))
+        if step < 1 or step > maxStep:
+            print('Вы ввели недопустимые значения!')
+            continue
+        cellX = imgWidth // step
+        cellY = imgHeight // step
+    else:
+        cellX = int(input('Введите ширину в ячейках:'))
+        cellY = int(input('Введите высоту в ячейках:'))
+        if cellX < 1 or cellX > imgWidth or cellY < 1 or cellY > imgHeight:
+            print('Вы ввели недопустимые значения!')
+            continue
+        step = min(imgWidth // cellX, imgHeight // cellY)
     allCells = cellX * cellY
     print(f'У вас получится мозайка состоящая из {allCells} ячеек: {cellX} в ширину и {cellY} в высоту, при размере иконки {step}')
     imgWidth = cellX * step
     imgHeight = cellY * step
     (imgWidth, imgHeight) != (oldImgWidth, oldImgHeight) and print(f'Картинка обрежется до: {imgWidth} в ширину и {imgHeight} в высоту')
-    
-    if input('Изменить выбор? [д\Н]') in ['да','ДА','Да','Д','д','Yes','yes','YES','Y','y','l','L']:
+
+    if input('Изменить выбор? [д\\Н]') in ['да','ДА','Да','Д','д','Yes','yes','YES','Y','y','l','L']:
         imgWidth = oldImgWidth
         imgHeight = oldImgHeight
         changeChoice = True
@@ -286,13 +276,13 @@ for numx, x in enumerate(range(0, imgWidth, step)):
             print('Обнаружена ячейка с прошлой игры. Замена...')
         else:
             mkdir(canvasDir, False)
-        
+
         print(f'Создаётся ячейка {numNow} из {allCells}.')
-        
+
         newImg = img.crop( (x, y, x + step, y + step) )
         iconDir = f'{dir_for_icons}x{numx + 1}_y{numy + 1}.ico'
         newImg.save(iconDir)
-        
+
         seticon(canvasDir, iconDir,0)
 
 input('Нажмите Enter для завершения')
