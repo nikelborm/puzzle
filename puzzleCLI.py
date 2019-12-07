@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+defaultImgName = 'test.jpg'
+import os
+isWindows = os.name == 'nt'
+if not isWindows:
+    print('К сожалению, скрипт можно запустить только на Windows.')
+    input('Нажмите Enter для завершения\n')
+    exit()
 #######################################################################
 # Декорирование функции input
 oldinput = input
@@ -7,76 +15,73 @@ def input(prompt):
 
 #######################################################################
 # Установка иконки на папку
-import os
-isWindows = os.name
-if isWindows:
-    import ctypes
-    from ctypes import POINTER, Structure, c_wchar, c_int, sizeof, byref
-    from ctypes.wintypes import BYTE, WORD, DWORD, LPWSTR, LPSTR
-    HICON = c_int
-    LPTSTR = LPWSTR
-    TCHAR = c_wchar
-    MAX_PATH = 260
-    FCSM_ICONFILE = 0x00000010
-    FCS_FORCEWRITE = 0x00000002
-    SHGFI_ICONLOCATION = 0x000001000
+import ctypes
+from ctypes import POINTER, Structure, c_wchar, c_int, sizeof, byref
+from ctypes.wintypes import BYTE, WORD, DWORD, LPWSTR, LPSTR
+HICON = c_int
+LPTSTR = LPWSTR
+TCHAR = c_wchar
+MAX_PATH = 260
+FCSM_ICONFILE = 0x00000010
+FCS_FORCEWRITE = 0x00000002
+SHGFI_ICONLOCATION = 0x000001000
 
-    class GUID(Structure):
-        _fields_ = [
-            ('Data1', DWORD),
-            ('Data2', WORD),
-            ('Data3', WORD),
-            ('Data4', BYTE * 8)]
+class GUID(Structure):
+    _fields_ = [
+        ('Data1', DWORD),
+        ('Data2', WORD),
+        ('Data3', WORD),
+        ('Data4', BYTE * 8)]
 
-    class SHFOLDERCUSTOMSETTINGS(Structure):
-        _fields_ = [
-            ('dwSize', DWORD),
-            ('dwMask', DWORD),
-            ('pvid', POINTER(GUID)),
-            ('pszWebViewTemplate', LPTSTR),
-            ('cchWebViewTemplate', DWORD),
-            ('pszWebViewTemplateVersion', LPTSTR),
-            ('pszInfoTip', LPTSTR),
-            ('cchInfoTip', DWORD),
-            ('pclsid', POINTER(GUID)),
-            ('dwFlags', DWORD),
-            ('pszIconFile', LPTSTR),
-            ('cchIconFile', DWORD),
-            ('iIconIndex', c_int),
-            ('pszLogo', LPTSTR),
-            ('cchLogo', DWORD)]
+class SHFOLDERCUSTOMSETTINGS(Structure):
+    _fields_ = [
+        ('dwSize', DWORD),
+        ('dwMask', DWORD),
+        ('pvid', POINTER(GUID)),
+        ('pszWebViewTemplate', LPTSTR),
+        ('cchWebViewTemplate', DWORD),
+        ('pszWebViewTemplateVersion', LPTSTR),
+        ('pszInfoTip', LPTSTR),
+        ('cchInfoTip', DWORD),
+        ('pclsid', POINTER(GUID)),
+        ('dwFlags', DWORD),
+        ('pszIconFile', LPTSTR),
+        ('cchIconFile', DWORD),
+        ('iIconIndex', c_int),
+        ('pszLogo', LPTSTR),
+        ('cchLogo', DWORD)]
 
-    class SHFILEINFO(Structure):
-        _fields_ = [
-            ('hIcon', HICON),
-            ('iIcon', c_int),
-            ('dwAttributes', DWORD),
-            ('szDisplayName', TCHAR * MAX_PATH),
-            ('szTypeName', TCHAR * 80)]
+class SHFILEINFO(Structure):
+    _fields_ = [
+        ('hIcon', HICON),
+        ('iIcon', c_int),
+        ('dwAttributes', DWORD),
+        ('szDisplayName', TCHAR * MAX_PATH),
+        ('szTypeName', TCHAR * 80)]
 
-    def seticon(folderpath, iconpath, iconindex):
-        """Set folder icon.
+def seticon(folderpath, iconpath, iconindex):
+    """Set folder icon.
 
-        >>> seticon(".", "C:\\Windows\\system32\\SHELL32.dll", 10)
+    >>> seticon(".", "C:\\Windows\\system32\\SHELL32.dll", 10)
 
-        """
-        shell32 = ctypes.windll.shell32
+    """
+    shell32 = ctypes.windll.shell32
 
-        folderpath = os.path.abspath(folderpath)
-        iconpath = os.path.abspath(iconpath)
+    folderpath = os.path.abspath(folderpath)
+    iconpath = os.path.abspath(iconpath)
 
-        fcs = SHFOLDERCUSTOMSETTINGS()
-        fcs.dwSize = sizeof(fcs)
-        fcs.dwMask = FCSM_ICONFILE
-        fcs.pszIconFile = iconpath
-        fcs.cchIconFile = 0
-        fcs.iIconIndex = iconindex
+    fcs = SHFOLDERCUSTOMSETTINGS()
+    fcs.dwSize = sizeof(fcs)
+    fcs.dwMask = FCSM_ICONFILE
+    fcs.pszIconFile = iconpath
+    fcs.cchIconFile = 0
+    fcs.iIconIndex = iconindex
 
-        sfi = SHFILEINFO()
+    sfi = SHFILEINFO()
 
-        index = shell32.Shell_GetCachedImageIndexW(sfi.szDisplayName, sfi.iIcon, 0)
+    index = shell32.Shell_GetCachedImageIndexW(sfi.szDisplayName, sfi.iIcon, 0)
 
-        shell32.SHUpdateImageW(sfi.szDisplayName, sfi.iIcon, 0, index)
+    shell32.SHUpdateImageW(sfi.szDisplayName, sfi.iIcon, 0, index)
 
 #######################################################################
 
@@ -182,9 +187,9 @@ while not isExists:
     imgName = input('Введите имя файла картинки, которая лежит в одной папке с программой:')
     if imgName and os.path.isfile(imgName):
         print('Файл найден.')
-    elif os.path.isfile('input.jpg'):
-        print('По заданному пути файл не найден, кроме заданного по умолчанию: test.jpg\n')
-        imgName = 'input.jpg'
+    elif not imgName and os.path.isfile(defaultImgName):
+        print(f'По заданному пути файл не найден, кроме заданного по умолчанию: {defaultImgName}\n')
+        imgName = defaultImgName
     else:
         print('Файл с картинкой по указанному пути не найден! Попробуйте снова...\n')
         continue
@@ -224,6 +229,7 @@ if not mode in ['1','2']:
     mode = '1'
 
 if mode == '1':
+    print('Список разрешений иконок, при которых исходная картинка не обрежется:')
     print('\n', stringForChoose, '\n')
     maxStep = min(imgWidth, imgHeight)
 
@@ -233,7 +239,7 @@ oldImgHeight = imgHeight
 changeChoice = True
 while changeChoice:
     if mode == '1':
-        step = int(input('Введите размер иконки из предложенного выше списка:'))
+        step = int(input('Введите свой размер иконки либо из предложенного выше списка:'))
         if step < 1 or step > maxStep:
             print('Вы ввели недопустимые значения!')
             continue

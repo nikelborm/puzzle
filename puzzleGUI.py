@@ -94,29 +94,28 @@ try:
 except:
     print('Отсутствует обязательный файл design.py')
     print('Этот файл содержит весь дизайн окна приложения')
-    input()
+    input('Нажмите Enter для завершения\n')
     exit()
 
 #######################################################################
 
-
 ##Твои рабочие элементы:
 
-##imgPath_field
-##selectImgPath_button
-##desktopPath_field
-##selectDesktopPath_button
-##iconSize_field
-##cellX_field
-##cellY_field
-##calculate_button
-##createPuzzle_button
-##clearParams_button
-##aboutDesktopPath_label
-##aboutImgPath_label
-##delPrevPuzzle_button
-##progressBar
-##textBrowser
+##imgPath_field                 Поле ввода пути к картинке
+##selectImgPath_button          Кнопка вызова окна выбора пути к картинке
+##desktopPath_field             Поле ввода пути к рабочему столу пользователя
+##selectDesktopPath_button      Кнопка вызова окна выбора пути к рабочему столу пользователя
+##iconSize_field                Поле ввода какой ширины и высоты будет каждая иконка
+##cellX_field                   Поле ввода ширины мозаики
+##cellY_field                   Поле ввода высоты мозаики
+##calculate_button              Кнопка расчёта всех параметров мозаики
+##createPuzzle_button           Кнопка создания мозаики
+##clearParams_button            Кнопка очистки всех полей ввода
+##aboutDesktopPath_label        Текстовое поле с информацией о возможных ошибках при выборе пути к рабочему столу пользователя
+##aboutImgPath_label            Текстовое поле с информацией о возможных ошибках при выборе пути к картинке
+##delPrevPuzzle_button          Кнопка удаления предыдущей мозаики
+##progressBar                   Прогресс бар создания мозаики
+##textBrowser                   Текстовое поле со всеми параметрами мозаики
 
 class ExampleApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
