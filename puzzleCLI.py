@@ -1,87 +1,52 @@
 # -*- coding: utf-8 -*-
-defaultImgName = 'test.jpg'
+DEFAULT_IMG_NAME = 'test.jpg'
+
 import os
 isWindows = os.name == 'nt'
+
 if not isWindows:
     print('К сожалению, скрипт можно запустить только на Windows.')
     input('Нажмите Enter для завершения\n')
     exit()
+
+from random import random
+
+from shutil import rmtree
+
+try:
+    from seticon import seticon
+except:
+    print('Отсутствует обязательный файл seticon.py')
+    print('Этот файл содержит код для добавления папкам иконок')
+    input('Нажмите Enter для завершения\n')
+    exit()
+
+try:
+    from PIL import Image
+except :
+    print('Библиотека PIL не найдена. Вы можете её установить следующей коммандой в консоли с правами администратора: ')
+    print('pip install pillow')
+    input('Нажмите Enter для завершения\n')
+    exit()
+
 #######################################################################
-# Декорирование функции input
+
 oldinput = input
 def input(prompt):
     print(prompt)
     return oldinput('>>> ')
 
 #######################################################################
-# Установка иконки на папку
-import ctypes
-from ctypes import POINTER, Structure, c_wchar, c_int, sizeof, byref
-from ctypes.wintypes import BYTE, WORD, DWORD, LPWSTR, LPSTR
-HICON = c_int
-LPTSTR = LPWSTR
-TCHAR = c_wchar
-MAX_PATH = 260
-FCSM_ICONFILE = 0x00000010
-FCS_FORCEWRITE = 0x00000002
-SHGFI_ICONLOCATION = 0x000001000
 
-class GUID(Structure):
-    _fields_ = [
-        ('Data1', DWORD),
-        ('Data2', WORD),
-        ('Data3', WORD),
-        ('Data4', BYTE * 8)]
-
-class SHFOLDERCUSTOMSETTINGS(Structure):
-    _fields_ = [
-        ('dwSize', DWORD),
-        ('dwMask', DWORD),
-        ('pvid', POINTER(GUID)),
-        ('pszWebViewTemplate', LPTSTR),
-        ('cchWebViewTemplate', DWORD),
-        ('pszWebViewTemplateVersion', LPTSTR),
-        ('pszInfoTip', LPTSTR),
-        ('cchInfoTip', DWORD),
-        ('pclsid', POINTER(GUID)),
-        ('dwFlags', DWORD),
-        ('pszIconFile', LPTSTR),
-        ('cchIconFile', DWORD),
-        ('iIconIndex', c_int),
-        ('pszLogo', LPTSTR),
-        ('cchLogo', DWORD)]
-
-class SHFILEINFO(Structure):
-    _fields_ = [
-        ('hIcon', HICON),
-        ('iIcon', c_int),
-        ('dwAttributes', DWORD),
-        ('szDisplayName', TCHAR * MAX_PATH),
-        ('szTypeName', TCHAR * 80)]
-
-def seticon(folderpath, iconpath, iconindex):
-    """Set folder icon.
-
-    >>> seticon(".", "C:\\Windows\\system32\\SHELL32.dll", 10)
-
-    """
-    shell32 = ctypes.windll.shell32
-
-    folderpath = os.path.abspath(folderpath)
-    iconpath = os.path.abspath(iconpath)
-
-    fcs = SHFOLDERCUSTOMSETTINGS()
-    fcs.dwSize = sizeof(fcs)
-    fcs.dwMask = FCSM_ICONFILE
-    fcs.pszIconFile = iconpath
-    fcs.cchIconFile = 0
-    fcs.iIconIndex = iconindex
-
-    sfi = SHFILEINFO()
-
-    index = shell32.Shell_GetCachedImageIndexW(sfi.szDisplayName, sfi.iIcon, 0)
-
-    shell32.SHUpdateImageW(sfi.szDisplayName, sfi.iIcon, 0, index)
+def mkdir(path, alert=True):
+    # Обёртка над функцией создания папки
+    try:
+        os.makedirs(path)
+    except OSError:
+        print(f'Создать директорию {path} не удалось')
+        oldinput('Завершите программу, иначе дальнейшая корректная работа не будет гарантирована\n')
+    else:
+        alert and print(f'Успешно создана директория {path} \n')
 
 #######################################################################
 
@@ -97,31 +62,38 @@ def NOD(A,B):
 
 def createConvertedListOfPrimeFactors(number):
     '''
-    Разбиваем на все простые множители и приводим к виду [[1,2,4,8],[1,3],[1,7,49]]
-    Этот код быстрый и я им горжусь, несмотря на то, что он понятен только мне
+    Разбиваем на все простые множители и попутно приводим к виду [[1,2,4,8],[1,3],[1,7,49]]
+    Этот код быстрый? Да. И вариант из предущего коммита был намного медленнее
     '''
-    # Наполняем простыми числами словарь pf
-    num = number
-    pf = {} # Словарь простых чисел (Prime Factors), где ключи простые, а значения их количества
-    # Ищем делимость на 2
-    while num % 2 == 0:
-        pf[2] = pf.get(2,0) + 1
+    num = number # Ищем все простые множители этого числа
+    pf = [] # Список рядов степеней простых чисел
+    if num % 2 == 0:
+        pf = [[1,2]] # Если 2 делитель, формируем начало
         num //= 2
-    # Дальше наполняем с шагом в 2, начиная с 3
-    d = 3
+        lastMult = 2 # Последний множитель в ряду (2, 4, 8 и т д)
+    while num % 2 == 0: # Если ещё есть 2ки, то их тоже добавляем
+        lastMult *= 2
+        pf[0].append(lastMult) # Наполняем наполняем список в pf новыми множителями
+        num //= 2
+    d = 3 # Тестируемый простой множитель (всё то сверху и цикл начинающийся с 3 ускоряет поиск простых в 2 раза)
     while d * d <= num:
         # Перебираем все возможные простые числа
         if num % d == 0:
-            # Если поделилось, либо +1 к последнему счётчику, либо новый ключ со значением 1 
-            pf[d] = pf.get(d,0) + 1
+            if d in pf[-1]: # Если тестируемый множитель принадлежит текущему ряду
+                lastMult *= d
+                pf[-1].append(lastMult)
+            else:
+                pf.append([1,d]) # Обьявляем новый ряд
+                lastMult = d
             num //= d
         else:
             d += 2
-    # Если ещё есть остатки, их тоже добавляем
-    if num > 1:
-        pf[num] = pf.get(num,0) + 1
-    # Возвращаем конвертированый список
-    return [[k ** j for j in range(v+1)] for k,v in pf.items()]
+    if num > 1: # Если есть остатки
+        if num in pf[-1]:
+            pf[-1].append(num * lastMult)
+        else:
+            pf.append([1,num])
+    return pf
 
 def createListOfAllMultipliers(number):
     # Находим список всех делителей числа
@@ -134,37 +106,14 @@ def createListOfAllMultipliers(number):
 
 #######################################################################
 
-def mkdir(path, alert=True):
-    # Обёртка над функцией создания папки
-    try:
-        os.makedirs(path)
-    except OSError:
-        print('Создать директорию %s не удалось' % path)
-        oldinput('Завершите программу, иначе дальнейшая корректная работа не будет гарантирована\n')
-    else:
-        alert and print('Успешно создана директория %s \n' % path)
-
-#######################################################################
-
-# Подключение библиотеки pillow
-try:
-    from PIL import Image
-except :
-    print('Библиотека PIL не найдена. Вы можете её установить следующей коммандой в консоли с правами администратора: ')
-    print('pip install pillow')
-    input('Нажмите Enter для завершения\n')
-    exit()
-
 dir_for_icons = 'C:\\PleaseDontDeleteMe\\'
 
 # Чистка предыдущих временных файлов
 if os.path.isdir(dir_for_icons):
     print('Обнаружены временные файлы с предыдущих запусков. Очистка...\n')
-    from shutil import rmtree
     rmtree(dir_for_icons, ignore_errors = True)
 
 # Создание временной папки для иконок
-from random import random
 dir_for_icons += f'dir_for_icons{random()}\\'
 mkdir(dir_for_icons)
 
@@ -174,9 +123,9 @@ while not isExists:
     imgName = input('Введите имя файла картинки, которая лежит в одной папке с программой:')
     if imgName and os.path.isfile(imgName):
         print('Файл найден.')
-    elif not imgName and os.path.isfile(defaultImgName):
-        print(f'По заданному пути файл не найден, кроме заданного по умолчанию: {defaultImgName}\n')
-        imgName = defaultImgName
+    elif not imgName and os.path.isfile(DEFAULT_IMG_NAME):
+        print(f'По заданному пути файл не найден, кроме заданного по умолчанию: {DEFAULT_IMG_NAME}\n')
+        imgName = DEFAULT_IMG_NAME
     else:
         print('Файл с картинкой по указанному пути не найден! Попробуйте снова...\n')
         continue
