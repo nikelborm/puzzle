@@ -1,75 +1,39 @@
 #######################################################################
 # Установка иконки на папку
 import os
-isWindows = os.name
+isWindows = os.name == 'nt'
 if isWindows:
-    import ctypes
-    from ctypes import POINTER, Structure, c_wchar, c_int, sizeof, byref
-    from ctypes.wintypes import BYTE, WORD, DWORD, LPWSTR, LPSTR
-    HICON = c_int
-    LPTSTR = LPWSTR
-    TCHAR = c_wchar
-    MAX_PATH = 260
-    FCSM_ICONFILE = 0x00000010
-    FCS_FORCEWRITE = 0x00000002
-    SHGFI_ICONLOCATION = 0x000001000
+    try:
+        from seticon import seticon
+    except:
+        print('Отсутствует обязательный файл seticon.py')
+        print('Этот файл содержит код для добавления папкам иконок')
+        input('Нажмите Enter для завершения\n')
+        exit()
 
-    class GUID(Structure):
-        _fields_ = [
-            ('Data1', DWORD),
-            ('Data2', WORD),
-            ('Data3', WORD),
-            ('Data4', BYTE * 8)]
+try:
+    from PyQt5 import QtCore, QtGui, QtWidgets
+except:
+    print('Библиотека PyQt5 не найдена. Вы можете её установить следующей коммандой в консоли с правами администратора: ')
+    print('pip install pyqt5')
+    input('Нажмите Enter для завершения\n')
+    exit()
 
-    class SHFOLDERCUSTOMSETTINGS(Structure):
-        _fields_ = [
-            ('dwSize', DWORD),
-            ('dwMask', DWORD),
-            ('pvid', POINTER(GUID)),
-            ('pszWebViewTemplate', LPTSTR),
-            ('cchWebViewTemplate', DWORD),
-            ('pszWebViewTemplateVersion', LPTSTR),
-            ('pszInfoTip', LPTSTR),
-            ('cchInfoTip', DWORD),
-            ('pclsid', POINTER(GUID)),
-            ('dwFlags', DWORD),
-            ('pszIconFile', LPTSTR),
-            ('cchIconFile', DWORD),
-            ('iIconIndex', c_int),
-            ('pszLogo', LPTSTR),
-            ('cchLogo', DWORD)]
+try:
+    from design import Ui_MainWindow
+except:
+    print('Отсутствует обязательный файл design.py')
+    print('Этот файл содержит весь дизайн окна приложения')
+    input('Нажмите Enter для завершения\n')
+    exit()
 
-    class SHFILEINFO(Structure):
-        _fields_ = [
-            ('hIcon', HICON),
-            ('iIcon', c_int),
-            ('dwAttributes', DWORD),
-            ('szDisplayName', TCHAR * MAX_PATH),
-            ('szTypeName', TCHAR * 80)]
-
-    def seticon(folderpath, iconpath, iconindex):
-        """Set folder icon.
-
-        >>> seticon(".", "C:\\Windows\\system32\\SHELL32.dll", 10)
-
-        """
-        shell32 = ctypes.windll.shell32
-
-        folderpath = os.path.abspath(folderpath)
-        iconpath = os.path.abspath(iconpath)
-
-        fcs = SHFOLDERCUSTOMSETTINGS()
-        fcs.dwSize = sizeof(fcs)
-        fcs.dwMask = FCSM_ICONFILE
-        fcs.pszIconFile = iconpath
-        fcs.cchIconFile = 0
-        fcs.iIconIndex = iconindex
-
-        sfi = SHFILEINFO()
-
-        index = shell32.Shell_GetCachedImageIndexW(sfi.szDisplayName, sfi.iIcon, 0)
-
-        shell32.SHUpdateImageW(sfi.szDisplayName, sfi.iIcon, 0, index)
+try:
+    from PIL import Image
+except:
+    print('Библиотека PIL не найдена. Вы можете её установить следующей коммандой в консоли с правами администратора: ')
+    print('pip install pillow')
+    input('Нажмите Enter для завершения\n')
+    exit()
 
 #######################################################################
 
@@ -79,23 +43,6 @@ def mkdir(path):
         os.makedirs(path)
     except OSError:
         print('Создать директорию %s не удалось' % path)
-
-#######################################################################
-
-try:
-    from PyQt5 import QtCore, QtGui, QtWidgets
-except:
-    print('Библиотека PyQt5 не найдена. Вы можете её установить следующей коммандой в консоли с правами администратора: ')
-    print('pip install pyqt5')
-    input('Нажмите Enter для завершения\n')
-    exit()
-try:
-    from design import Ui_MainWindow
-except:
-    print('Отсутствует обязательный файл design.py')
-    print('Этот файл содержит весь дизайн окна приложения')
-    input('Нажмите Enter для завершения\n')
-    exit()
 
 #######################################################################
 
@@ -202,7 +149,6 @@ class ExampleApp(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.onChangeCellXorCellY()
                 else:
                     # Если это новое изображение, обработать его
-                    from PIL import Image
                     img = Image.open(imgPath).convert('RGBA')
                     self.isCalculated = False
                     self.imgWidth = imgWidth = img.size[0]
@@ -216,8 +162,6 @@ class ExampleApp(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.lastSuccessOpenedImgPath = imgPath
                 isSuccess = True
                 text = f'Изображение с разрешением {self.imgWidth} * {self.imgHeight} успешно открыто.'
-            except ImportError:
-                text = 'Библиотека PIL не найдена. Команда для установки: pip install pillow'
             except:
                 text = 'Данное изображение не поддерживается. Выберите другое.'
         else:
