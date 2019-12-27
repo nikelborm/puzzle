@@ -1,3 +1,6 @@
 __pycache__/
 .vscode/
-.vscode/settings.json
+/compilePY2EXE.cmd
+/convertUI2PY.cmd
+/build
+/dist
