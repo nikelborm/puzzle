@@ -31,10 +31,9 @@ except :
 
 #######################################################################
 
-oldinput = input
-def input(prompt):
+def moddedInput(prompt):
     print(prompt)
-    return oldinput('>>> ')
+    return input('>>> ')
 
 #######################################################################
 
@@ -44,9 +43,10 @@ def mkdir(path, alert=True):
         os.makedirs(path)
     except OSError:
         print(f'Создать директорию {path} не удалось')
-        oldinput('Завершите программу, иначе дальнейшая корректная работа не будет гарантирована\n')
+        input('Завершите программу, иначе дальнейшая корректная работа не будет гарантирована\n')
     else:
-        alert and print(f'Успешно создана директория {path} \n')
+        if alert:
+            print(f'Успешно создана директория {path} \n')
 
 #######################################################################
 
@@ -62,8 +62,8 @@ def NOD(A,B):
 
 def createConvertedListOfPrimeFactors(number):
     '''
-    Разбиваем на все простые множители и попутно приводим к виду [[1,2,4,8],[1,3],[1,7,49]]
-    Этот код быстрый? Да. И вариант из предущего коммита был намного медленнее
+    Разбиваем на все простые множители и попутно преобразуем для следующего этапа.
+    Выход имеет вид [[1,2,4,8],[1,3],[1,7,49]]
     '''
     num = number # Ищем все простые множители этого числа
     pf = [] # Список рядов степеней простых чисел
@@ -120,7 +120,7 @@ mkdir(dir_for_icons)
 # Ввод, проверка имени, открытие исходной картинки
 isExists = False
 while not isExists:
-    imgName = input('Введите имя файла картинки, которая лежит в одной папке с программой:')
+    imgName = moddedInput('Введите имя файла картинки, которая лежит в одной папке с программой:')
     if imgName and os.path.isfile(imgName):
         print('Файл найден.')
     elif not imgName and os.path.isfile(DEFAULT_IMG_NAME):
@@ -144,8 +144,8 @@ while not isExists:
 try:
     env = dict(os.environ)
     deskPath = f"{env['HOMEDRIVE'] + env['HOMEPATH']}\\Desktop\\"
-except:
-    user = input('Введите имя вашего пользователя: ')
+except NameError:
+    user = moddedInput('Введите имя вашего пользователя: ')
     deskPath = f'C:\\Users\\{user}\\Desktop\\'
     if not user and os.path.isdir(deskPath):
         deskPath = 'C:\\Users\\User\\Desktop\\'
@@ -156,7 +156,7 @@ listOfAllMultipliers.sort()
 stringForChoose = ', '.join(map(str,listOfAllMultipliers))
 
 # Выбор размера мозайки
-mode = input('''Выберете режим ввода:
+mode = moddedInput('''Выберете режим ввода:
 Вы задаёте разрешение иконки в пикселях[1](по умолчанию)
 Вы задаёте разрешение мозаики в ячейках[2]''')
 
@@ -175,15 +175,15 @@ oldImgHeight = imgHeight
 changeChoice = True
 while changeChoice:
     if mode == '1':
-        step = int(input('Введите свой размер иконки либо из предложенного выше списка:'))
+        step = int(moddedInput('Введите свой размер иконки либо из предложенного выше списка:'))
         if step < 1 or step > maxStep:
             print('Вы ввели недопустимые значения!')
             continue
         cellX = imgWidth // step
         cellY = imgHeight // step
     else:
-        cellX = int(input('Введите ширину в ячейках:'))
-        cellY = int(input('Введите высоту в ячейках:'))
+        cellX = int(moddedInput('Введите ширину в ячейках:'))
+        cellY = int(moddedInput('Введите высоту в ячейках:'))
         if cellX < 1 or cellX > imgWidth or cellY < 1 or cellY > imgHeight:
             print('Вы ввели недопустимые значения!')
             continue
@@ -194,7 +194,7 @@ while changeChoice:
     imgHeight = cellY * step
     (imgWidth, imgHeight) != (oldImgWidth, oldImgHeight) and print(f'Картинка обрежется до: {imgWidth} в ширину и {imgHeight} в высоту')
 
-    if input('Изменить выбор? [д\\Н]') in ['да','ДА','Да','Д','д','Yes','yes','YES','Y','y','l','L']:
+    if moddedInput('Изменить выбор? [д\\Н]') in ['да','ДА','Да','Д','д','Yes','yes','YES','Y','y','l','L']:
         imgWidth = oldImgWidth
         imgHeight = oldImgHeight
         changeChoice = True
@@ -224,4 +224,4 @@ for numx, x in enumerate(range(0, imgWidth, step)):
 
         seticon(canvasDir, iconDir,0)
 
-input('Нажмите Enter для завершения')
+moddedInput('Нажмите Enter для завершения')
