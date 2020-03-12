@@ -1,7 +1,7 @@
 import ctypes
 import os
-from ctypes import POINTER, Structure, c_wchar, c_int, sizeof, byref
-from ctypes.wintypes import BYTE, WORD, DWORD, LPWSTR, LPSTR
+from ctypes import POINTER, Structure, c_wchar, c_int, sizeof
+from ctypes.wintypes import BYTE, WORD, DWORD, LPWSTR
 HICON = c_int
 LPTSTR = LPWSTR
 TCHAR = c_wchar
