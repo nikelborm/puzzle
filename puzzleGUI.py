@@ -5,15 +5,15 @@ isWindows = os.name == 'nt'
 if isWindows:
     try:
         from seticon import seticon
-    except:
+    except ImportError:
         print('Отсутствует обязательный файл seticon.py')
         print('Этот файл содержит код для добавления папкам иконок')
         input('Нажмите Enter для завершения\n')
         exit()
 
 try:
-    from PyQt5 import QtCore, QtGui, QtWidgets
-except:
+    from PyQt5 import QtWidgets
+except ImportError:
     print('Библиотека PyQt5 не найдена. Вы можете её установить следующей коммандой в консоли с правами администратора: ')
     print('pip install pyqt5')
     input('Нажмите Enter для завершения\n')
@@ -21,7 +21,7 @@ except:
 
 try:
     from design import Ui_MainWindow
-except:
+except ImportError:
     print('Отсутствует обязательный файл design.py')
     print('Этот файл содержит весь дизайн окна приложения')
     input('Нажмите Enter для завершения\n')
@@ -29,7 +29,7 @@ except:
 
 try:
     from PIL import Image
-except:
+except ImportError:
     print('Библиотека PIL не найдена. Вы можете её установить следующей коммандой в консоли с правами администратора: ')
     print('pip install pillow')
     input('Нажмите Enter для завершения\n')
@@ -64,8 +64,11 @@ def mkdir(path):
 ##progressBar                   Прогресс бар создания мозаики
 ##textBrowser                   Текстовое поле со всеми параметрами мозаики
 
-class ExampleApp(QtWidgets.QMainWindow, Ui_MainWindow):
+class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
+        '''
+            Класс, содержащий всю логику окна приложения
+        '''
         super().__init__()
         self.setupUi(self)
 
@@ -330,16 +333,16 @@ class ExampleApp(QtWidgets.QMainWindow, Ui_MainWindow):
 #######################################################################
 
 # Открытие окна
-window = QtWidgets.QApplication([])
-window.setStyle('Fusion')
-app = ExampleApp()
-app.show()
+app = QtWidgets.QApplication([])
+app.setStyle('Fusion')
+window = MainWindow()
+window.show()
 if isWindows:
     # Попытка установки папки рабочего стола по умолчанию
     try:
         env = dict(os.environ)
         directory = (env['HOMEDRIVE'] + env['HOMEPATH']).replace('\\' , '/') + '/Desktop'
-    except:
+    except NameError:
         directory = 'C:/Users/User/Desktop'
-    app.desktopPath_field.setText(directory)
-window.exec_()
+    window.desktopPath_field.setText(directory)
+app.exec_()
