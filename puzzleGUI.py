@@ -67,7 +67,7 @@ def mkdir(path):
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         '''
-            Класс, содержащий всю логику окна приложения
+        Класс, содержащий всю логику окна приложения.
         '''
         super().__init__()
         self.setupUi(self)
