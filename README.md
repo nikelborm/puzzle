@@ -12,11 +12,11 @@
 pip install pillow
 ```
 Эта только если вы запускаете *puzzleGUI.py*
-```
+```bash
 pip install pyqt5
 ```
 ## Пример использования
 ### Например скрипт превращает такую картинку
 > ![Пример исходной картинки](https://raw.githubusercontent.com/nikelborm/puzzle/master/test.jpg)
-### В мозаику, которая в собранном виде выглядит вот так
+### В мозаику, которая после того, как вы её соберёте, выглядит вот так
 > ![Пример собранной мозаики](https://raw.githubusercontent.com/nikelborm/puzzle/master/example.jpg)

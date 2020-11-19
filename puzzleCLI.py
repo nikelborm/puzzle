@@ -15,7 +15,7 @@ from shutil import rmtree
 
 try:
     from seticon import seticon
-except:
+except ImportError:
     print('Отсутствует обязательный файл seticon.py')
     print('Этот файл содержит код для добавления папкам иконок')
     input('Нажмите Enter для завершения\n')
@@ -23,7 +23,7 @@ except:
 
 try:
     from PIL import Image
-except :
+except ImportError:
     print('Библиотека PIL не найдена. Вы можете её установить следующей коммандой в консоли с правами администратора: ')
     print('pip install pillow')
     input('Нажмите Enter для завершения\n')
@@ -66,41 +66,49 @@ def createConvertedListOfPrimeFactors(number):
     Выход имеет вид [[1,2,4,8],[1,3],[1,7,49]].
     '''
     num = number # Ищем все простые множители этого числа
-    pf = [] # Список рядов степеней простых чисел
-    if num % 2 == 0:
-        pf = [[1,2]] # Если 2 делитель, формируем начало
+    powersOfPrimeNumbers = [] # Список рядов степеней простых чисел
+    if num % 2 == 0: # Если 2 делитель, формируем начало и работаем по двойке
+        powersOfPrimeNumbers = [ [ 1, 2 ] ]
         num //= 2
-        lastMult = 2 # Последний множитель в ряду (2, 4, 8 и т д)
-    while num % 2 == 0: # Если ещё есть 2ки, то их тоже добавляем
-        lastMult *= 2
-        pf[0].append(lastMult) # Наполняем наполняем список в pf новыми множителями
-        num //= 2
-    d = 3 # Тестируемый простой множитель (всё то сверху и цикл начинающийся с 3 ускоряет поиск простых в 2 раза)
+        lastMultInLastRow = 2 # Последний множитель в ряду (2, 4, 8 и т д)
+        while num % 2 == 0: # Если ещё есть 2ки, то их тоже добавляем
+            lastMultInLastRow *= 2
+            powersOfPrimeNumbers[ 0 ].append( lastMultInLastRow ) # Наполняем наполняем список в powersOfPrimeNumbers новыми множителями
+            num //= 2
+    d = 3 # Тестируемый простой множитель (цикл начинающийся с 3 ускоряет поиск простых в 2 раза)
+    while d * d <= num:
+        if num % d == 0:
+            powersOfPrimeNumbers.append( [ 1, d ] ) # Обьявляем новый ряд
+            lastMultInLastRow = d
+            num //= d
+            break
+        else:
+            d += 2
     while d * d <= num:
         # Перебираем все возможные простые числа
         if num % d == 0:
-            if d in pf[-1]: # Если тестируемый множитель принадлежит текущему ряду
-                lastMult *= d
-                pf[-1].append(lastMult)
+            if d == powersOfPrimeNumbers[ -1 ][ 1 ]: # Если тестируемый множитель принадлежит текущему ряду
+                lastMultInLastRow *= d
+                powersOfPrimeNumbers[ -1 ].append( lastMultInLastRow )
             else:
-                pf.append([1,d]) # Обьявляем новый ряд
-                lastMult = d
+                powersOfPrimeNumbers.append( [ 1, d ] ) # Обьявляем новый ряд
+                lastMultInLastRow = d
             num //= d
         else:
             d += 2
     if num > 1: # Если есть остатки
-        if num in pf[-1]:
-            pf[-1].append(num * lastMult)
+        if (len(powersOfPrimeNumbers)) and ( num == powersOfPrimeNumbers[ -1 ][ 1 ] ):
+            powersOfPrimeNumbers[ -1 ].append( num * lastMultInLastRow )
         else:
-            pf.append([1,num])
-    return pf
+            powersOfPrimeNumbers.append( [ 1, num ] )
+    return powersOfPrimeNumbers # имеет вид [[1,2,4,8],[1,3],[1,7,49]]
 
 def createListOfAllMultipliers(number):
     # Находим список всех делителей числа
-    arr = createConvertedListOfPrimeFactors(number)
-    nextarr = arr[0]
-    for arrnow in arr[1:]:
-        nextarr = [k*j for j in nextarr for k in arrnow]
+    arr = createConvertedListOfPrimeFactors( number )
+    nextarr = arr[ 0 ]
+    for arrnow in arr[ 1 : ]:
+        nextarr = [ k * j for j in nextarr for k in arrnow ]
     nextarr.sort()
     return nextarr
 
