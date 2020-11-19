@@ -289,7 +289,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 iconDir = f'{dir_for_icons}/x{numx + 1}_y{numy + 1}.ico'
                 newImg.save(iconDir)
 
-                seticon(canvasDir, iconDir,0)
+                seticon(canvasDir, iconDir, 0)
                 y += iconSize
             x += iconSize
         self.changeStateOfAllFields(True)
