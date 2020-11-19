@@ -1,7 +1,9 @@
 import ctypes
 import os
-from ctypes import POINTER, Structure, c_wchar, c_int, sizeof
-from ctypes.wintypes import BYTE, WORD, DWORD, LPWSTR
+from ctypes import POINTER, Structure, c_wchar, c_int, sizeof, byref
+from ctypes.wintypes import BYTE, WORD, DWORD, LPWSTR, LPSTR
+# import win32api
+
 HICON = c_int
 LPTSTR = LPWSTR
 TCHAR = c_wchar
@@ -15,8 +17,8 @@ class GUID(Structure):
         ('Data1', DWORD),
         ('Data2', WORD),
         ('Data3', WORD),
-        ('Data4', BYTE * 8)]
-
+        ('Data4', BYTE * 8)
+    ]
 class SHFOLDERCUSTOMSETTINGS(Structure):
     _fields_ = [
         ('dwSize', DWORD),
@@ -33,15 +35,16 @@ class SHFOLDERCUSTOMSETTINGS(Structure):
         ('cchIconFile', DWORD),
         ('iIconIndex', c_int),
         ('pszLogo', LPTSTR),
-        ('cchLogo', DWORD)]
-
+        ('cchLogo', DWORD)
+    ]
 class SHFILEINFO(Structure):
     _fields_ = [
         ('hIcon', HICON),
         ('iIcon', c_int),
         ('dwAttributes', DWORD),
         ('szDisplayName', TCHAR * MAX_PATH),
-        ('szTypeName', TCHAR * 80)]
+        ('szTypeName', TCHAR * 80)
+    ]
 
 def seticon(folderpath, iconpath, iconindex):
     """Set folder icon.
@@ -61,7 +64,14 @@ def seticon(folderpath, iconpath, iconindex):
     fcs.cchIconFile = 0
     fcs.iIconIndex = iconindex
 
+    hr = shell32.SHGetSetFolderCustomSettings(byref(fcs), folderpath, FCS_FORCEWRITE)
+    # if hr:
+    #     raise WindowsError(win32api.FormatMessage(hr))
+
     sfi = SHFILEINFO()
+    hr = shell32.SHGetFileInfoW(folderpath, 0, byref(sfi), sizeof(sfi), SHGFI_ICONLOCATION)
+    # if hr == 0:
+    #     raise WindowsError(win32api.FormatMessage(hr))
 
     index = shell32.Shell_GetCachedImageIndexW(sfi.szDisplayName, sfi.iIcon, 0)
 
